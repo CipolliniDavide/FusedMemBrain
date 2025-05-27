@@ -1,4 +1,4 @@
-from scipy.sparse import csgraph, csc_matrix, csr_matrix, save_npz
+from scipy.sparse import csgraph, csc_matrix, csr_matrix, save_npz, csr_array
 from scipy import sparse
 import numpy as np
 from matplotlib import pyplot as plt
@@ -41,14 +41,13 @@ class MVNA():
         from networkx import incidence_matrix
         return self.delete_from_csr(incidence_matrix(self.G, oriented=True).tocsr(), row_indices=[self.gnd[0]])
 
-
-
     def delete_from_csr(self, mat, row_indices=[], col_indices=[]):
         """
         Remove the rows (denoted by ``row_indices``) and columns (denoted by ``col_indices``) from the CSR sparse matrix ``mat``.
         WARNING: Indices of altered axes are reset in the returned matrix
         """
-        if not isinstance(mat, csr_matrix):
+        if not isinstance(mat, (csr_matrix, csr_array)):
+            print(type(mat))
             raise ValueError("works only for CSR format -- use .tocsr() first")
 
         rows = []

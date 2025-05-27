@@ -81,7 +81,7 @@ class create_graph():
 
 
 class MemNet(Measure, MVNA):
-    def __init__(self, mem_param, net_param, gnd, src, hidden_src, diag=1, add_opAmp=False):
+    def __init__(self, mem_param, net_param, gnd, src, hidden_src, diag=1, add_opAmp=False, G_root=None):
         self.gnd = gnd
         self.src = copy.deepcopy(src)
         self.mem_param = mem_param
@@ -90,11 +90,15 @@ class MemNet(Measure, MVNA):
         self.diag = diag
 
         if mem_param and net_param:
-            self.number_of_nodes = int(self.net_param.rows * self.net_param.cols+1)
             self.number_of_sources = len(self.src)
 
-            self.G_root = create_graph.define_grid_graph_2(rows=net_param.rows, cols=net_param.cols,
-                                                           seed=net_param.seed, diag=diag)
+            self.G_root = G_root if G_root is not None else create_graph.define_grid_graph_2(rows=net_param.rows,
+                                                                                             cols=net_param.cols,
+                                                                                             seed=net_param.seed,
+                                                                                             diag=diag)
+            # self.number_of_nodes = int(self.net_param.rows * self.net_param.cols)
+            self.number_of_nodes = self.G_root.number_of_nodes()
+
             self.Adj = nx.to_scipy_sparse_array(self.G_root, format='csr')
             self.number_of_edges = self.Adj.data.sum() // 2
             self.adj_indexes = np.argwhere(self.Adj > 0)
