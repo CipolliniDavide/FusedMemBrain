@@ -76,7 +76,7 @@ class MemNet(Measure, MVNA):
             self.number_of_nodes = self.G_root.number_of_nodes()
 
             self.Adj = nx.to_scipy_sparse_array(self.G_root, format='csr')
-            self.number_of_edges = self.Adj.data.sum() // 2
+            self.number_of_edges = int(self.Adj.data.sum() // 2)
             self.adj_indexes = np.argwhere(self.Adj > 0)
             self.triangular_adj_indexes = np.argwhere(sparse.triu(self.Adj, k=0) > 0)
             if not (self.net_param.frac_of_static_elements < 1 and self.net_param.frac_of_static_elements>=0):
