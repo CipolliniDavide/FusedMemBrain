@@ -178,7 +178,6 @@ if __name__ == "__main__":
     # visualize.plot_network(G=net.G, numeric_label=True, labels=list(node_labels), figsize=(8, 8), node_size=10)
 
     ####################################################################
-    # TODO: to be concluded this plot
 
     fig, (ax1, ax2) = plt.subplots(sharex=True, nrows=2, figsize=(6, 6), layout='tight')
     ax1.plot(time_array, G_avg, label=r'$G_{avg}$', color='black')
