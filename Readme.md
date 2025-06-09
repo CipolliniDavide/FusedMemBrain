@@ -1,8 +1,9 @@
 # Fused-MemBrain
 
-![screenshot](FusedMemBrain.jpg)
-[Figure from Cipollini et. al., 2025 Neuromorph. Comput. Eng. 5 024002.]
-
+<p align="center">
+  <img src="FusedMemBrain.jpg" alt="screenshot" width="600">
+</p>
+<p align="center"><em>Figure from Cipollini et. al., 2025 Neuromorph. Comput. Eng. 5 024002.</em></p>
 
 This repository contains the code relative to the paper
 **Cipollini et al. 2025 Neuromorph. Comput. Eng. 5 024002
