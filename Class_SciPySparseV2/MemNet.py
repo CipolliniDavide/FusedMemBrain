@@ -4,7 +4,7 @@ Code uses SciPy csr_matrix to take advantage of sparsness and symmetry of the ma
 Computation is made only on the upper triangular matrix.
 Diagonals are supposed to be zero (no self link).
 '''
-
+from copy import deepcopy
 from matplotlib import pyplot as plt
 import networkx as nx
 import sys
@@ -24,23 +24,23 @@ from .ModifiedNodalAnalysis import MVNA
 
 class create_graph():
 
-    def define_grid_graph_2(rows, cols, seed, diag=1):
+    def define_grid_graph_2(rows, cols, diag_seed=None, diag_flag=1):
         '''
         Reference : Kevin Montano et al 2022 Neuromorph. Comput. Eng. 2 014007
         Code based on https://github.com/ MilanoGianluca/Grid-Graph_Modeling_Memristive_Nanonetworks
         :param rows:
         :param cols:
-        :param seed:
+        :param diag_seed:
         :return:
         '''
         ##define a grid graph
 
         Ggrid = nx.grid_graph(dim=[rows, cols])
-        if diag == 1:
+        if diag_flag == 1:
             print('Add rnd diagonals to grid-graph')
             # Define random diagonals
-            if seed:
-                random.seed(seed)
+            if diag_seed:
+                random.seed(diag_seed)
             else:
                 random.seed(time.time())
 
@@ -54,7 +54,7 @@ class create_graph():
 
 
         ##define a graph with integer nodes and positions of a grid graph
-        G = nx.convert_node_labels_to_integers(Ggrid, first_label=0, ordering='default', label_attribute='coord')
+        G = nx.convert_node_labels_to_integers(Ggrid, first_label=0, ordering='default', label_attribute='pos')
         return G
 
 
@@ -70,8 +70,8 @@ class MemNet(Measure, MVNA):
 
             self.G_root = G_root if G_root is not None else create_graph.define_grid_graph_2(rows=net_param.rows,
                                                                                              cols=net_param.cols,
-                                                                                             seed=net_param.seed,
-                                                                                             diag=diag)
+                                                                                             diag_seed=net_param.diag_seed,
+                                                                                             diag_flag=diag)
             # self.number_of_nodes = int(self.net_param.rows * self.net_param.cols)
             self.number_of_nodes = self.G_root.number_of_nodes()
 
@@ -86,6 +86,7 @@ class MemNet(Measure, MVNA):
 
             # print('Mixed Mem-resistor:\n\t{:.1f}% memristor\n\t{:.1f}% resistor'.format(self.number_of_dyn_edges/self.number_of_edges*100,
             #                                                                  self.net_param.frac_of_static_elements*100))
+            # self.update_edge_weights = self.update_AllEdge_weights
             self.update_edge_weights = self.update_DynEdge_weights
             self.dynamic_el_index = random.sample(range(self.number_of_edges), k=self.number_of_dyn_edges)
 
@@ -186,7 +187,6 @@ class MemNet(Measure, MVNA):
 
 
     def update_DynEdge_weights(self, delta_t):
-        " Update of conductance of the memristor edges "
         # np.multiply can be used only on np.array (or matx.data of scipy.csr sparse matrix)!
 
         self.kp = self.mem_param.kp0 * np.exp(self.mem_param.eta_p * np.abs(self.dVmat.data[self.dynamic_el_index]))
@@ -255,14 +255,21 @@ class MemNet(Measure, MVNA):
         else:
             # Run without any saving
             H_list = [[] for t in range(len(t_list))]
+            node_voltage_record = []
             curr_rec = np.zeros((len(self.src), len(t_list)))
-            # H_list[0] = self.mvna(groundnode_list=groundnode_list, sourcenode_list=sourcenode_list, V_list=V_list, t=0)
+            H_list[0] = self.mvna(groundnode_list=groundnode_list, sourcenode_list=sourcenode_list, V_list=V_list, t=0)
+            node_voltage_record.append(deepcopy(self.node_Voltage))
+            curr_rec[:, 0] = - self.source_current
             # sys.stdout.write("\r\t\tNetwork Stimulation: {:d}/{:d}".format(1, len(t_list)))
-            for t in range(0, len(t_list)):
+            for t in range(1, len(t_list)):
+                delta_t = t_list[t] - t_list[t-1]
                 H_list[t] = self.mvna(groundnode_list=groundnode_list, sourcenode_list=sourcenode_list, V_list=V_list, t=t)
-                # Current flowing into the elctrode is positive, current flowing out the electrode is negative
+                node_voltage_record.append(deepcopy(self.node_Voltage))
+                # Current flowing into the electrode is positive, current flowing out the electrode is negative
                 curr_rec[:, t] = - self.source_current
                 self.update_edge_weights(delta_t=delta_t)
+
+            return H_list, curr_rec, np.array(node_voltage_record).T
 
             return H_list, curr_rec
         # sys.stdout.write("\r\t\tNetwork Stimulation: {:d}/{:d}".format(t+1, len(t_list)))
@@ -296,6 +303,7 @@ if __name__ == "__main__":
     sim_param = edict({'T': 1.5,  # 4e-3, # [s]
                        'sampling_rate': 500  # [Hz]  # =steps / T  # [Hz]
                        })
+                       # sapmpling rate dovrebbe essere 1/3 Hz
 
     t_list = np.arange(0, sim_param.T + 1 / sim_param.sampling_rate, 1 / sim_param.sampling_rate)  # [s]
     ########## Define source and ground pads lists ##########
