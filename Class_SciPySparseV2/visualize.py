@@ -30,7 +30,11 @@ class visualize:
                      edge_alpha=1,  # Separate alpha for edges
                      node_shape="o",
                      edge_width=4,
-                     labels=None, save_fold=None, title='', save_name='', show=False,
+                     labels=None,
+                     save_fold=None,
+                     title='',
+                     save_name='',
+                     show=False,
                      pos=None):
 
         if ax is None:
@@ -38,7 +42,8 @@ class visualize:
             ax = fig.add_subplot(111)  # Remove x and y ticks
 
         if labels is None:
-            labels = [(node, '') for i, node in enumerate(G.nodes())]
+            labels = {node: '' for node in G.nodes()}
+            # labels = [(node, '') for i, node in enumerate(G.nodes())]
 
         if pos is not None:
             coordinates = pos
@@ -112,11 +117,13 @@ class visualize:
                 cb_edges.ax.set_xticks(cb_edge_ticks)
                 cb_edges.ax.set_xticklabels(cb_edge_tick_lab, fontdict=fontdict_cb_ticks_label)
 
+        coord_map = dict(coordinates)
         if labels:
-            for (n, lab) in labels:
-                x, y = coordinates[n][1]
-                ax.text(x + hor_text, y + up_text, s=lab, fontdict=fontdict_cb,
-                        horizontalalignment='center')
+            for n, lab in labels.items():
+                if n in coord_map:  # salta i nodi senza coordinate
+                    x, y = coord_map[n]
+                    ax.text(x + hor_text, y + up_text, s=lab, fontdict=fontdict_cb,
+                            horizontalalignment='center')
 
         plt.box(False)
         fontdict = {'fontsize': 'xx-large', 'fontweight': 'bold'}

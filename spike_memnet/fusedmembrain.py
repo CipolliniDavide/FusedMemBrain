@@ -16,8 +16,8 @@ from Class_SciPySparseV2.visualize import visualize
 from Class_SciPySparseV2.utils import utils
 
 from RunModules.Reservoir_wth_floating_gate import node_map, generate_random_points
-from helpers_dataset.convert_format import convert_format_of_dataset
-from helpers_dataset.load_dataset import data_loader
+# from helpers_dataset.convert_format import convert_format_of_dataset
+# from helpers_dataset.load_dataset import data_loader
 
 from helpers_plot_function.spiking_help_plot import (raster_plot, plot_hidneur_mem, pca_of_dynamics,
                                                      plot_neuron_average_spike_rate, plot_ntw_average_firing_rate)
