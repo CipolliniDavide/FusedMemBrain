@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from scipy.sparse import csgraph, csc_matrix, csr_matrix, save_npz, csr_array
 from scipy import sparse
 import numpy as np
@@ -111,7 +113,7 @@ class MVNA():
         # add voltage (respect to gnd) as a node attribute
         mask = np.ones(self.number_of_nodes, bool)
         mask[groundnode_list[0]] = False
-        self.node_Voltage[mask] = matX[:self.number_of_nodes-1].reshape(-1)
+        self.node_Voltage[mask] = deepcopy(matX[:self.number_of_nodes-1].reshape(-1))
         self.source_current = matX[self.number_of_nodes-1:]
 
         # Branch voltage (more or less)
