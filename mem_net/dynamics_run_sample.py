@@ -152,18 +152,27 @@ if __name__ == "__main__":
     fig_format="png"
     save_fold_fig = "./"
     ####################################### Topology ###################################################################
+    # Graph topology: grid network with random diagonals
     from Class_SciPySparseV2.MemNet import create_graph
     G = create_graph.define_grid_graph_2(rows=net_param['rows'], cols=net_param['cols'],
                                          diag_flag=net_param['diag_flag'], diag_seed=net_param['diag_seed'])
-
-
-    # Get positions and select the couple of nodes that are the farthest
-    pos = nx.get_node_attributes(G, 'pos')
     src = [31]
     gnd = [409]
     electrodes_node_labels = [(gnd[0], 'Gnd')] + [(s, 'Src') for s in src]
-    node_labels = {node: label for node, label in electrodes_node_labels}
 
+    # Graph topology: heterogeneous sample
+    file = 'sample_it=000000_Nnw=001000.pickle'
+    G = nx.convert_node_labels_to_integers(pickle_load(file), first_label=0)
+    # Get positions and select the couple of nodes that are the farthest
+    pos = nx.get_node_attributes(G, 'pos')
+    node1, node2, max_distance = identify_farthest_nodes(pos)
+    src = [node1]  # ,30] #[node_map(3, 1, rows, cols), 10] # define a list of source nodes in the range [0, rows*cols-1]
+    gnd = [node2]  # [20, 0]#409] # define a list of ground nodes in the range [0, rows*cols-1]
+    electrodes_node_labels = [(gnd[0], 'Gnd')] + [(s, 'Src') for s in src]
+
+    # Get positions and select the couple of nodes that are the farthest
+    node_labels = {node: label for node, label in electrodes_node_labels}
+    pos = nx.get_node_attributes(G, 'pos')
 
     pulse[time_array>100] = V_read
     pulse[:20] = V_read
