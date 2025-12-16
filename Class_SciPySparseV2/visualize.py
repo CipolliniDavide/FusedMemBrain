@@ -61,30 +61,32 @@ class visualize:
         except:
             weights = np.ones(G.number_of_edges())
 
+        if edge_vmin is None:
+            edge_vmin = float(np.min(weights))
+        if edge_vmax is None:
+            edge_vmax = float(np.max(weights))
+        if edge_vmin == edge_vmax:  # caso non pesato -> 1 e 1
+            edge_vmin, edge_vmax = 0.0, 1.0
+
         if len(node_color) == 0:
-            if np.min(weights) == np.max(weights):
-                # Draw the edges with separate edge_alpha
-                nx.draw_networkx_edges(G, pos=dict(coordinates), alpha=edge_alpha, width=edge_width, edge_color=weights,
-                                       edge_cmap=edge_cmap, edge_vmin=np.min(weights), edge_vmax=np.max(weights), ax=ax)
+            nx.draw_networkx_edges(
+                G, pos=dict(coordinates),
+                alpha=edge_alpha, width=edge_width,
+                edge_color=weights,
+                edge_cmap=edge_cmap,
+                edge_vmin=edge_vmin, edge_vmax=edge_vmax,
+                ax=ax
+            )
 
-                # Draw the nodes with node_alpha
-                nx.draw_networkx_nodes(G, pos=dict(coordinates), node_size=node_size, node_shape=node_shape,
-                                       alpha=node_alpha, ax=ax)
-            else:
-                nx.draw_networkx_edges(G, pos=dict(coordinates), alpha=edge_alpha, width=edge_width, edge_color=weights,
-                                       edge_cmap=edge_cmap, edge_vmin=np.min(weights), edge_vmax=np.max(weights), ax=ax)
+            nx.draw_networkx_nodes(
+                G, pos=dict(coordinates),
+                node_size=node_size, node_shape=node_shape,
+                alpha=node_alpha,
+                ax=ax
+            )
 
-                nx.draw_networkx_nodes(G, pos=dict(coordinates), node_size=node_size, node_shape=node_shape,
-                                       alpha=node_alpha, ax=ax)
         else:
-            if not edge_vmin:
-                edge_vmin = np.min(weights)
-            if not edge_vmax:
-                edge_vmax = np.max(weights)
-            if not vmin:
-                vmin = np.min(node_color)
-            if not vmax:
-                vmax = np.max(node_color)
+
 
             # Draw edges with their own edge_alpha
             nx.draw_networkx_edges(G, pos=dict(coordinates), alpha=edge_alpha, width=edge_width, edge_color=weights,
